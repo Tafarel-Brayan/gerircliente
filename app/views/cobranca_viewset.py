@@ -4,7 +4,7 @@ from ..filters.cobranca_filter import CobrancaFilter
 from ..models.cobranca import Cobranca
 from ..serializers import CobrancaSerializer, CriarCobrancasMensaisSerializer, CriarCobrancasParceladasSerializer
 from rest_framework.response import Response
-from drf_spectacular.utils import extend_schema
+from drf_yasg.utils import swagger_auto_schema
 
 
 class CobrancaViewSet(viewsets.ModelViewSet):
@@ -72,11 +72,12 @@ class CobrancaViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
 
     @action(detail=False, methods=['post'])
-    @extend_schema(
-        request=CriarCobrancasParceladasSerializer,  # Serializer para o payload
+    @swagger_auto_schema(
+        # Define o serializer para o payload
+        request_body=CriarCobrancasParceladasSerializer,
         # Define o serializer para a resposta
         responses={201: CobrancaSerializer(many=True)},
-        description="Endpoint para parcelar uma cobrança"
+        operation_description="Endpoint para parcelar uma cobrança"
     )
     def parcelar_cobranca(self, request):
         """
