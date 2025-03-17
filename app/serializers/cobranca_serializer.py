@@ -5,7 +5,7 @@ from ..models import Cobranca
 class CobrancaSerializer(serializers.ModelSerializer):
     class Meta:
         model = Cobranca
-        fields = ['id', 'cliente', 'data_vencimento', 'valor', 'status',
+        fields = ['id', 'cliente', 'tipo', 'data_vencimento', 'valor', 'status',
                   'descricao', 'data_criacao']
         read_only_fields = ['data_criacao']
 

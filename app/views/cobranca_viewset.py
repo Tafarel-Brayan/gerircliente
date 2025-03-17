@@ -2,8 +2,9 @@ from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from ..filters.cobranca_filter import CobrancaFilter
 from ..models.cobranca import Cobranca
-from ..serializers import CobrancaSerializer, CriarCobrancasMensaisSerializer
+from ..serializers import CobrancaSerializer, CriarCobrancasMensaisSerializer, CriarCobrancasParceladasSerializer
 from rest_framework.response import Response
+from drf_spectacular.utils import extend_schema
 
 
 class CobrancaViewSet(viewsets.ModelViewSet):
@@ -69,3 +70,24 @@ class CobrancaViewSet(viewsets.ModelViewSet):
         cobrancas = self.queryset.filter(status='ATRASADO')
         serializer = self.get_serializer(cobrancas, many=True)
         return Response(serializer.data)
+
+    @action(detail=False, methods=['post'])
+    @extend_schema(
+        request=CriarCobrancasParceladasSerializer,  # Serializer para o payload
+        # Define o serializer para a resposta
+        responses={201: CobrancaSerializer(many=True)},
+        description="Endpoint para parcelar uma cobrança"
+    )
+    def parcelar_cobranca(self, request):
+        """
+        Endpoint para parcelar uma cobrança
+        """
+        serializer = CriarCobrancasParceladasSerializer(data=request.data)
+        if serializer.is_valid():
+            cobrancas = serializer.save()
+            return Response({
+                'message': f'Foram criadas {len(cobrancas)} cobranças parceladas com sucesso',
+                'cobrancas': CobrancaSerializer(cobrancas, many=True).data
+            }, status=status.HTTP_201_CREATED)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
