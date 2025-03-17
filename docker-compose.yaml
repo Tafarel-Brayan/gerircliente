@@ -1,0 +1,18 @@
+version: "3.9"
+
+services:
+  postgres:
+    image: postgres # Utilizando a imagem do PostgreSQL LTS
+    restart: always
+    container_name: gerircliente_db
+    environment:
+      POSTGRES_DB: gerircliente # Nome do banco de dados
+      POSTGRES_USER: root # Nome do usuário
+      POSTGRES_PASSWORD: ST@!@#2025 # Senha do usuário
+    ports:
+      - "5432:5432" # Expondo a porta 5432 (padrão do PostgreSQL)
+    volumes:
+      - db_data:/var/lib/postgresql/data # Volume para persistir os dados
+
+volumes:
+  db_data:
