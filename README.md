@@ -4,6 +4,15 @@ Este projeto é uma API para gerenciamento de cobranças, pagamentos e clientes.
 
 ---
 
+## Swagger and Redoc
+
+Rotas para testes e documentação da aplicação
+
+```bash
+http://127.0.0.1:8000/swagger/
+http://127.0.0.1:8000/redoc/
+```
+
 ## Testar a Proteção das Rotas
 
 Abaixo estão os passos para testar a proteção das rotas usando autenticação JWT.
