@@ -2,9 +2,34 @@ from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from ..filters.cobranca_filter import CobrancaFilter
 from ..models.cobranca import Cobranca
-from ..serializers import CobrancaSerializer, CriarCobrancasMensaisSerializer, CriarCobrancasParceladasSerializer
+from ..serializers import CobrancaSerializer, CriarCobrancasParceladasSerializer
 from rest_framework.response import Response
 from drf_yasg.utils import swagger_auto_schema
+from drf_yasg import openapi
+
+parcelar_cobranca_response_schema = openapi.Schema(
+    type=openapi.TYPE_OBJECT,
+    properties={
+        'message': openapi.Schema(type=openapi.TYPE_STRING, description='Mensagem de sucesso'),
+        'cobrancas': openapi.Schema(
+            type=openapi.TYPE_ARRAY,
+            items=openapi.Schema(
+                type=openapi.TYPE_OBJECT,
+                properties={
+                    'id': openapi.Schema(type=openapi.TYPE_INTEGER, description='ID da cobrança'),
+                    'cliente': openapi.Schema(type=openapi.TYPE_INTEGER, description='ID do cliente'),
+                    'tipo': openapi.Schema(type=openapi.TYPE_STRING, description='Tipo da cobrança'),
+                    'data_vencimento': openapi.Schema(type=openapi.TYPE_STRING, format='date', description='Data de vencimento'),
+                    'valor': openapi.Schema(type=openapi.TYPE_STRING, format='decimal', description='Valor da cobrança'),
+                    'status': openapi.Schema(type=openapi.TYPE_STRING, description='Status da cobrança'),
+                    'descricao': openapi.Schema(type=openapi.TYPE_STRING, description='Descrição da cobrança'),
+                    'data_criacao': openapi.Schema(type=openapi.TYPE_STRING, format='date-time', description='Data de criação'),
+                },
+            ),
+            description='Lista de cobranças criadas'
+        ),
+    },
+)
 
 
 class CobrancaViewSet(viewsets.ModelViewSet):
@@ -15,34 +40,6 @@ class CobrancaViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         cobranca = serializer.save()
         cobranca.atualizar_status()  # Atualiza o status se estiver atrasada
-
-    @action(detail=False, methods=['post'])
-    def criar_mensais(self, request):
-        """
-        Endpoint para criar cobranças mensais
-        """
-        serializer = CriarCobrancasMensaisSerializer(data=request.data)
-        if serializer.is_valid():
-            try:
-                cobrancas = Cobranca.criar_cobrancas_mensais(
-                    cliente=serializer.validated_data['cliente'],
-                    valor=serializer.validated_data['valor'],
-                    quantidade_meses=serializer.validated_data['quantidade_meses'],
-                    dia_vencimento=serializer.validated_data['dia_vencimento'],
-                    descricao_base=serializer.validated_data['descricao_base']
-                )
-
-                return Response({
-                    'message': f'Foram criadas {len(cobrancas)} cobranças com sucesso',
-                    'cobrancas': CobrancaSerializer(cobrancas, many=True).data
-                }, status=status.HTTP_201_CREATED)
-
-            except ValueError as e:
-                return Response({
-                    'error': str(e)
-                }, status=status.HTTP_400_BAD_REQUEST)
-
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     @action(detail=True, methods=['post'])
     def cancelar(self, request, pk=None):
@@ -76,7 +73,7 @@ class CobrancaViewSet(viewsets.ModelViewSet):
         # Define o serializer para o payload
         request_body=CriarCobrancasParceladasSerializer,
         # Define o serializer para a resposta
-        responses={201: CobrancaSerializer(many=True)},
+        responses={201: parcelar_cobranca_response_schema},
         operation_description="Endpoint para parcelar uma cobrança"
     )
     def parcelar_cobranca(self, request):

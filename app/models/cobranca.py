@@ -58,30 +58,3 @@ class Cobranca(models.Model):
         if self.status == 'PENDENTE' and self.esta_atrasado():
             self.status = 'ATRASADO'
             self.save()
-
-    @classmethod
-    def criar_cobrancas_mensais(cls, cliente, valor, quantidade_meses, dia_vencimento, descricao_base):
-        if dia_vencimento < 1 or dia_vencimento > 31:
-            raise ValueError("Dia de vencimento deve estar entre 1 e 31")
-
-        if quantidade_meses < 1:
-            raise ValueError("Quantidade de meses deve ser maior que zero")
-
-        if valor <= 0:
-            raise ValueError("Valor deve ser maior que zero")
-
-        # Verifica se já existem cobranças para o período
-        data_inicial = timezone.now().date()
-        data_inicial = data_inicial.replace(day=dia_vencimento)
-        data_final = data_inicial + relativedelta(months=quantidade_meses)
-
-        cobrancas_existentes = cls.objects.filter(
-            cliente=cliente,
-            data_vencimento__range=[data_inicial, data_final]
-        ).exists()
-
-        if cobrancas_existentes:
-            raise ValueError(
-                "Já existem cobranças cadastradas para este período")
-
-        # Continua com a criação das cobranças...
