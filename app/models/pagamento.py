@@ -2,6 +2,7 @@ from django.db import models
 from .cobranca import Cobranca
 from django.core.validators import MinValueValidator
 from decimal import Decimal
+from django.contrib.auth.models import User
 
 
 class Pagamento(models.Model):
@@ -40,6 +41,14 @@ class Pagamento(models.Model):
     )
 
     observacao = models.TextField(blank=True, null=True)
+
+    recebido_por = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='pagamentos_recebidos'
+    )
 
     class Meta:
         db_table = 'pagamento'

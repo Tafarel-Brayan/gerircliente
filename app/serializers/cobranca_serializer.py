@@ -6,8 +6,8 @@ class CobrancaSerializer(serializers.ModelSerializer):
     class Meta:
         model = Cobranca
         fields = ['id', 'cliente', 'tipo', 'data_vencimento', 'valor', 'status',
-                  'descricao', 'data_criacao']
-        read_only_fields = ['data_criacao']
+                  'descricao', 'data_criacao', 'criado_por']
+        read_only_fields = ['data_criacao', 'criado_por']
 
     def validate(self, data):
         """

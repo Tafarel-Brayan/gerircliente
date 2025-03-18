@@ -3,6 +3,7 @@ from django.core.validators import MinValueValidator
 from decimal import Decimal
 from django.utils import timezone
 from dateutil.relativedelta import *
+from django.contrib.auth.models import User  # Importar o modelo de usuário
 
 
 class Cobranca(models.Model):
@@ -43,6 +44,14 @@ class Cobranca(models.Model):
     )
     descricao = models.CharField(max_length=200)
     data_criacao = models.DateTimeField(auto_now_add=True)
+
+    criado_por = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='cobrancas_criadas'
+    )
 
     class Meta:
         db_table = 'cobranca'
